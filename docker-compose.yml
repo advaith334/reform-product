@@ -1,0 +1,24 @@
+# Local Postgres for development. Credentials match the DATABASE_URL in
+# backend/.env.example, so `docker compose up -d` is the only setup step.
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: reform-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: reform
+    ports:
+      - "5432:5432"
+    volumes:
+      - reform-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # The schema itself is applied by the API on startup (db.init_schema), so
+      # there is no init script to mount here.
+      test: ["CMD-SHELL", "pg_isready -U postgres -d reform"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  reform-pgdata:
